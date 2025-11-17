@@ -33,7 +33,6 @@ import {
 } from "./storage";
 import { changeOptimizerView } from "./review";
 import { filterObject } from "../../utils/filterObject";
-import formatAllyCode from "../../utils/formatAllyCode";
 
 export const TOGGLE_KEEP_OLD_MODS = "TOGGLE_KEEP_OLD_MODS";
 
@@ -65,7 +64,6 @@ function fetchVersion() {
   })
     .then((response) => response.text())
     .catch((error) => {
-      console.error(error);
       throw new Error(
         "Error fetching the current version. Please check to make sure that you are on the latest version"
       );
@@ -836,90 +834,103 @@ function modCancelModal() {
 
 export function loadC3PO(modsFile, keepOldMods) {
   return function (dispatch) {
-    try {
-      const playerData = JSON.parse(modsFile);
-      const modData = playerData.inventory.unequippedMod; //.slice(0, 20);
-      const allyCode = `${playerData.allyCode}`;
-      const playerName = playerData.name;
-      const unequippedMods = modData.map(Mod.fromRaw);
+    dispatch(setIsBusy(true));
 
-      const db = getDatabase();
+    // Make sure that the UI shows that it's processing the file
+    return new Promise((resolve) => setTimeout(() => resolve(), 0))
+      .then(() => {
+        const playerData = JSON.parse(modsFile);
+        const modData = playerData.inventory.unequippedMod; //.slice(0, 20);
+        const allyCode = `${playerData.allyCode}`;
+        const playerName = playerData.name;
+        const unequippedMods = modData.map(Mod.fromRaw);
 
-      db.getProfile(
-        allyCode,
-        (dbProfile) => {
-          const oldProfile = dbProfile
-            ? dbProfile
-            : new PlayerProfile(allyCode, playerName);
+        const db = getDatabase();
 
-          const newMods = groupByKey(unequippedMods, (mod) => mod.id);
-          const oldMods = (() => {
-            if (keepOldMods) {
-              return groupByKey(oldProfile.mods, (mod) => mod.id);
-            } else {
-              return oldProfile.mods.reduce((mods, mod) => {
-                // If not keeping old mods, we still want to keep any mod that is assigned to a character,
-                // since this fetch only pulls unequipped mods
-                if (mod.characterID) {
-                  mods[mod.id] = mod;
-                }
-                return mods;
-              }, {});
-            }
-          })();
-          const finalMods = Object.values(Object.assign({}, oldMods, newMods));
+        db.getProfile(
+          allyCode,
+          (dbProfile) => {
+            const oldProfile = dbProfile
+              ? dbProfile
+              : new PlayerProfile(allyCode, playerName);
 
-          const newProfile = oldProfile.withMods(finalMods);
-          db.saveProfile(newProfile, nothing, (error) =>
-            dispatch(
-              showFlash(
-                "Storage Error",
-                "Error saving your profile: " +
-                  error.message +
-                  " Your data may be lost on page refresh."
+            const newMods = groupByKey(unequippedMods, (mod) => mod.id);
+            const oldMods = (() => {
+              if (keepOldMods) {
+                return groupByKey(oldProfile.mods, (mod) => mod.id);
+              } else {
+                return oldProfile.mods.reduce((mods, mod) => {
+                  // If not keeping old mods, we still want to keep any mod that is assigned to a character,
+                  // since this fetch only pulls unequipped mods
+                  if (mod.characterID) {
+                    mods[mod.id] = mod;
+                  }
+                  return mods;
+                }, {});
+              }
+            })();
+            const finalMods = Object.values(
+              Object.assign({}, oldMods, newMods)
+            );
+
+            const newProfile = oldProfile.withMods(finalMods);
+            db.saveProfile(newProfile, nothing, (error) =>
+              dispatch(
+                showFlash(
+                  "Storage Error",
+                  "Error saving your profile: " +
+                    error.message +
+                    " Your data may be lost on page refresh."
+                )
               )
-            )
-          );
-          db.deleteLastRun(newProfile.allyCode, nothing, (error) =>
-            dispatch(
-              showFlash(
-                "Storage Error",
-                "Error updating your data: " +
-                  error.message +
-                  " The optimizer may not recalculate correctly until you fetch again"
+            );
+            db.deleteLastRun(newProfile.allyCode, nothing, (error) =>
+              dispatch(
+                showFlash(
+                  "Storage Error",
+                  "Error updating your data: " +
+                    error.message +
+                    " The optimizer may not recalculate correctly until you fetch again"
+                )
               )
-            )
-          );
-          dispatch(addPlayerProfile(newProfile));
-          dispatch(setProfile(newProfile));
-          dispatch(fetchHotUtilsStatus(newProfile.allyCode));
-        },
-        (error) => {
-          dispatch(
-            showError(
-              "Error fetching your profile: " +
-                error.message +
-                " Please try again"
-            )
-          );
-        }
-      );
+            );
+            dispatch(addPlayerProfile(newProfile));
+            dispatch(setProfile(newProfile));
+            dispatch(fetchHotUtilsStatus(newProfile.allyCode));
+          },
+          (error) => {
+            dispatch(
+              showError(
+                "Error fetching your profile: " +
+                  error.message +
+                  " Please try again"
+              )
+            );
+          }
+        );
 
-      dispatch(
-        showFlash(
-          "Success!",
-          <p>
-            Successfully loaded data for{" "}
-            <span className={"gold"}>{unequippedMods.length}</span> unequipped
-            mods for <span className={"purple"}>{playerName}</span>.
-          </p>
-        )
-      );
-    } catch (e) {
-      throw new Error(
-        "Unable to process C-3P0 file. Please make sure you're uploading the correct file: " +
-          e.message
-      );
-    }
+        dispatch(
+          showFlash(
+            "Success!",
+            <p>
+              Successfully loaded data for{" "}
+              <span className={"gold"}>{unequippedMods.length}</span> unequipped
+              mods for <span className={"purple"}>{playerName}</span>.
+            </p>
+          )
+        );
+      })
+      .catch((error) => {
+        dispatch(
+          showError([
+            <p key={1}>
+              Unable to process C-3P0 file. Please make sure you're uploading
+              the correct file
+            </p>,
+            <p key={2}>{error.message}</p>,
+          ])
+        );
+      })
+      .finally(() => dispatch(setIsBusy(false)));
   };
 }
