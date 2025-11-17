@@ -284,11 +284,12 @@ class App extends PureComponent {
               Fetch with HotUtils
             </button>
             <button
+              title={"Import mods from C-3PO"}
               onClick={() =>
                 this.props.showModal("c3po-modal", this.c3poModal())
               }
             >
-              C-3PO
+              <img src={"/img/c3po.svg"} alt={"C-3PO"} className={"textIcon"} />
             </button>
             <Help header={"How do I pull unequipped mods?"}>
               {this.unequippedModsHelp()}
@@ -666,6 +667,7 @@ class App extends PureComponent {
           </a>
           .
         </p>
+        <img src={"/img/c3po.gif"} alt={"C-3PO"} />
         <ol>
           <li>
             Link your ally code to your discord account by using the command{" "}
@@ -694,12 +696,6 @@ class App extends PureComponent {
             JSON file, and upload it here!
           </li>
         </ol>
-        <p>
-          <strong>Use at your own risk!</strong> The C-3PO bot breaks the terms
-          of service for Star Wars: Galaxy of Heroes. You assume all risk in
-          using this tool. Grandivory's Mods Optimizer is not associated with
-          C-3PO.
-        </p>
         <div className={"actions"}>
           <button
             type={"button"}
@@ -729,20 +725,41 @@ class App extends PureComponent {
     return (
       <div className={"help"}>
         <p>
-          HotUtils is another tool for SWGOH that allows you to directly modify
-          your game account. One of the advantages of being a subscriber to
-          HotUtils is that it can pull all of your mod data, including
-          unequipped mods, at any time, and without any cooldown period.
-          Normally, your player and mod data can only be updated once every
-          hour.
+          HotUtils and C-3PO are additional tools for SWGOH that can access your
+          game account.
         </p>
+        <dl>
+          <dt>HotUtils</dt>
+          <dd>
+            One of the advantages of being a subscriber to HotUtils is that it
+            can pull all of your mod data, including unequipped mods, at any
+            time, and without any cooldown period. Normally, your player and mod
+            data can only be updated once every hour. With a HotUtils
+            subscription, you can also mvoe your mods directly from the
+            optimizer, without having to move them manually in-game.
+          </dd>
+          <dt>C-3PO</dt>
+          <dd>
+            C-3PO is a discord bot that you can use to grab your unequipped
+            mods, then upload the generated file to the optimizer. You can
+            access the C-3PO bot directly on the{" "}
+            <a
+              href="https://discord.gg/t7X5V2JNcW"
+              target={"_blank"}
+              rel={"noopener noreferrer"}
+            >
+              Mods Optimizer Discord
+            </a>
+            .
+          </dd>
+        </dl>
         <p>
-          <strong>Use at your own risk!</strong> HotUtils functionality breaks
-          the terms of service for Star Wars: Galaxy of Heroes. You assume all
-          risk in using this tool. Grandivory's Mods Optimizer is not associated
-          with HotUtils.
+          <strong>Use at your own risk!</strong> HotUtils and C-3PO
+          functionality breaks the terms of service for Star Wars: Galaxy of
+          Heroes. You assume all risk in using these tools. Grandivory's Mods
+          Optimizer is not associated with HotUtils or C-3PO.
         </p>
-        <p>
+        <div className={"grid-2"}>
           <a
             href={"https://www.hotutils.com/"}
             target={"_blank"}
@@ -750,14 +767,20 @@ class App extends PureComponent {
           >
             https://www.hotutils.com/
           </a>
-        </p>
-        <p>
+          <a
+            href={"https://discord.c3po.wtf/"}
+            target={"_blank"}
+            rel={"noopener noreferrer"}
+          >
+            https://discord.c3po.wtf/
+          </a>
           <img
             className={"fit"}
             src={"/img/hotsauce512.png"}
             alt={"hotsauce"}
           />
-        </p>
+          <img className={"fit"} src={"/img/c3po.gif"} alt={"C-3PO"} />
+        </div>
       </div>
     );
   }
