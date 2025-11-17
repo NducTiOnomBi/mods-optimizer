@@ -177,7 +177,8 @@ html, body {
   display: inline-block;
 }
 
-.App-header .actions form {
+.App-header .actions form,
+.modal .actions form {
   display: inline-block;
 }
 
@@ -362,6 +363,10 @@ nav button.active {
   max-width: 40em;
 }
 
+.modal.c3po-modal {
+  max-width: 45em;
+}
+
 .modal .help {
   max-width: 30em;
 }
@@ -437,6 +442,15 @@ li {
 
 a {
   cursor: pointer;
+}
+
+code {
+  background-color: #222;
+}
+
+dt {
+  font-weight: bold;
+  color: #2997f1;
 }
 
 img.fit {
