@@ -7,23 +7,23 @@ import { modSets, modSlots } from "../constants/enums";
 import OptimizationPlan from "./OptimizationPlan";
 
 const hotUtilsSlotMap = {
-  'Data-Bus': 'circle',
-  'Holo-Array': 'triangle',
-  'Multiplexer': 'cross',
-  'Processor': 'diamond',
-  'Receiver': 'arrow',
-  'Transmitter': 'square'
+  "Data-Bus": "circle",
+  "Holo-Array": "triangle",
+  Multiplexer: "cross",
+  Processor: "diamond",
+  Receiver: "arrow",
+  Transmitter: "square",
 };
 
 const hotUtilsSetMap = {
-  'Crit Chance': 'critchance',
-  'Crit Damage': 'critdamage',
-  'Defense': 'defense',
-  'Health': 'health',
-  'Offense': 'offense',
-  'Potency': 'potency',
-  'Resistance': 'tenacity',
-  'Speedpercentadditive': 'speed'
+  "Crit Chance": "critchance",
+  "Crit Damage": "critdamage",
+  Defense: "defense",
+  Health: "health",
+  Offense: "offense",
+  Potency: "potency",
+  Resistance: "tenacity",
+  Speedpercentadditive: "speed",
 };
 
 class Mod {
@@ -37,7 +37,17 @@ class Mod {
   characterID;
   tier;
 
-  constructor(id, slot, set, level, pips, primaryStat, secondaryStats, characterID, tier = 1) {
+  constructor(
+    id,
+    slot,
+    set,
+    level,
+    pips,
+    primaryStat,
+    secondaryStats,
+    characterID,
+    tier = 1
+  ) {
     this.id = id;
     this.slot = slot;
     this.set = set;
@@ -108,7 +118,7 @@ class Mod {
       this.level,
       6,
       this.primaryStat.upgradePrimary(6),
-      this.secondaryStats.map(stat => stat.upgradeSecondary()),
+      this.secondaryStats.map((stat) => stat.upgradeSecondary()),
       this.characterID,
       1
     );
@@ -119,8 +129,11 @@ class Mod {
   }
 
   shouldSlice(character, target) {
-    return character.optimizerSettings.sliceMods && this.pips === 5 &&
+    return (
+      character.optimizerSettings.sliceMods &&
+      this.pips === 5 &&
       (this.level === 15 || this.shouldLevel(target))
+    );
   }
 
   /**
@@ -134,20 +147,20 @@ class Mod {
     let workingMod = this;
 
     const summary = {
-      'Health': new Stat('Health', '0'),
-      'Protection': new Stat('Protection', '0'),
-      'Speed': new Stat('Speed', '0'),
-      'Critical Damage': new Stat('Critical Damage %', '0'),
-      'Potency': new Stat('Potency', '0'),
-      'Tenacity': new Stat('Tenacity', '0'),
-      'Physical Damage': new Stat('Physical Damage', '0'),
-      'Physical Critical Chance': new Stat('Physical Critical Chance %', '0'),
-      'Armor': new Stat('Armor', '0'),
-      'Special Damage': new Stat('Special Damage', '0'),
-      'Special Critical Chance': new Stat('Special Critical Chance %', '0'),
-      'Resistance': new Stat('Resistance', '0'),
-      'Accuracy': new Stat('Accuracy %', '0'),
-      'Critical Avoidance': new Stat('Critical Avoidance %', '0')
+      Health: new Stat("Health", "0"),
+      Protection: new Stat("Protection", "0"),
+      Speed: new Stat("Speed", "0"),
+      "Critical Damage": new Stat("Critical Damage %", "0"),
+      Potency: new Stat("Potency", "0"),
+      Tenacity: new Stat("Tenacity", "0"),
+      "Physical Damage": new Stat("Physical Damage", "0"),
+      "Physical Critical Chance": new Stat("Physical Critical Chance %", "0"),
+      Armor: new Stat("Armor", "0"),
+      "Special Damage": new Stat("Special Damage", "0"),
+      "Special Critical Chance": new Stat("Special Critical Chance %", "0"),
+      Resistance: new Stat("Resistance", "0"),
+      Accuracy: new Stat("Accuracy %", "0"),
+      "Critical Avoidance": new Stat("Critical Avoidance %", "0"),
     };
 
     if (withUpgrades) {
@@ -155,14 +168,23 @@ class Mod {
       if (15 > workingMod.level && target.upgradeMods) {
         workingMod = workingMod.levelUp();
       }
-      if (15 === workingMod.level && 5 === workingMod.pips && character.optimizerSettings.sliceMods) {
+      if (
+        15 === workingMod.level &&
+        5 === workingMod.pips &&
+        character.optimizerSettings.sliceMods
+      ) {
         workingMod = workingMod.slice();
       }
     }
 
-    for (let modStat of [workingMod.primaryStat].concat(workingMod.secondaryStats)) {
+    for (let modStat of [workingMod.primaryStat].concat(
+      workingMod.secondaryStats
+    )) {
       const flatStats = modStat.getFlatValuesForCharacter(character);
-      flatStats.forEach(stat => summary[stat.displayType] = summary[stat.displayType].plus(stat));
+      flatStats.forEach(
+        (stat) =>
+          (summary[stat.displayType] = summary[stat.displayType].plus(stat))
+      );
     }
 
     return summary;
@@ -174,19 +196,20 @@ class Mod {
   serialize() {
     let modObject = {};
 
-    [modObject.primaryBonusType, modObject.primaryBonusValue] = this.primaryStat.serialize();
+    [modObject.primaryBonusType, modObject.primaryBonusValue] =
+      this.primaryStat.serialize();
 
     for (let i = 0; i < 4; i++) {
       if (i < this.secondaryStats.length) {
         [
           modObject[`secondaryType_${i + 1}`],
           modObject[`secondaryValue_${i + 1}`],
-          modObject[`secondaryRoll_${i + 1}`]
+          modObject[`secondaryRoll_${i + 1}`],
         ] = this.secondaryStats[i].serialize();
       } else {
-        modObject[`secondaryType_${i + 1}`] = '';
-        modObject[`secondaryValue_${i + 1}`] = '';
-        modObject[`secondaryRoll_${i + 1}`] = '';
+        modObject[`secondaryType_${i + 1}`] = "";
+        modObject[`secondaryValue_${i + 1}`] = "";
+        modObject[`secondaryRoll_${i + 1}`] = "";
       }
     }
 
@@ -222,17 +245,22 @@ class Mod {
   }
 
   static fromHotUtils(modJson) {
-    const secondaryStats = [1, 2, 3, 4].map(slot => {
-      if (!modJson.hasOwnProperty(`secondaryType_${slot}`) || !modJson[`secondaryType_${slot}`]) {
-        return null;
-      }
+    const secondaryStats = [1, 2, 3, 4]
+      .map((slot) => {
+        if (
+          !modJson.hasOwnProperty(`secondaryType_${slot}`) ||
+          !modJson[`secondaryType_${slot}`]
+        ) {
+          return null;
+        }
 
-      return Stat.fromHotUtils(
-        modJson[`secondaryType_${slot}`],
-        modJson[`secondaryValue_${slot}`],
-        modJson[`secondaryRoll_${slot}`]
-      );
-    }).filter(x => null !== x);
+        return Stat.fromHotUtils(
+          modJson[`secondaryType_${slot}`],
+          modJson[`secondaryValue_${slot}`],
+          modJson[`secondaryRoll_${slot}`]
+        );
+      })
+      .filter((x) => null !== x);
 
     return new Mod(
       modJson.mod_uid,
@@ -242,29 +270,75 @@ class Mod {
       modJson.pips,
       Stat.fromHotUtils(modJson.primaryBonusType, modJson.primaryBonusValue),
       secondaryStats,
-      'null' === modJson.characterID ? null : modJson.characterID,
+      "null" === modJson.characterID ? null : modJson.characterID,
+      modJson.tier
+    );
+  }
+
+  static fromRaw(modJson) {
+    // definitionId is a 3 digit number representing [Set(1-8), Pips(1-6), Slot(1-6)]
+    const set = setBonuses[modSets[Math.floor(modJson.definitionId / 100)]];
+    const pips = Math.floor((modJson.definitionId % 100) / 10);
+    const slot = modSlots[modJson.definitionId % 10];
+
+    return new Mod(
+      modJson.id,
+      slot,
+      set,
+      modJson.level,
+      pips,
+      Stat.fromRaw(modJson.primaryStat),
+      modJson.secondaryStat.map(Stat.fromRaw),
+      null,
       modJson.tier
     );
   }
 
   static deserialize(modJson) {
-    const primaryStat = new Stat(modJson.primaryBonusType, modJson.primaryBonusValue);
+    const primaryStat = new Stat(
+      modJson.primaryBonusType,
+      modJson.primaryBonusValue
+    );
     let secondaryStats = [];
 
-    if ('None' !== modJson.secondaryType_1 && '' !== modJson.secondaryValue_1) {
-      secondaryStats.push(new Stat(modJson.secondaryType_1, modJson.secondaryValue_1, +modJson.secondaryRoll_1 || 1));
+    if ("None" !== modJson.secondaryType_1 && "" !== modJson.secondaryValue_1) {
+      secondaryStats.push(
+        new Stat(
+          modJson.secondaryType_1,
+          modJson.secondaryValue_1,
+          +modJson.secondaryRoll_1 || 1
+        )
+      );
     }
-    if ('None' !== modJson.secondaryType_2 && '' !== modJson.secondaryValue_2) {
-      secondaryStats.push(new Stat(modJson.secondaryType_2, modJson.secondaryValue_2, +modJson.secondaryRoll_2 || 1));
+    if ("None" !== modJson.secondaryType_2 && "" !== modJson.secondaryValue_2) {
+      secondaryStats.push(
+        new Stat(
+          modJson.secondaryType_2,
+          modJson.secondaryValue_2,
+          +modJson.secondaryRoll_2 || 1
+        )
+      );
     }
-    if ('None' !== modJson.secondaryType_3 && '' !== modJson.secondaryValue_3) {
-      secondaryStats.push(new Stat(modJson.secondaryType_3, modJson.secondaryValue_3, +modJson.secondaryRoll_3 || 1));
+    if ("None" !== modJson.secondaryType_3 && "" !== modJson.secondaryValue_3) {
+      secondaryStats.push(
+        new Stat(
+          modJson.secondaryType_3,
+          modJson.secondaryValue_3,
+          +modJson.secondaryRoll_3 || 1
+        )
+      );
     }
-    if ('None' !== modJson.secondaryType_4 && '' !== modJson.secondaryValue_4) {
-      secondaryStats.push(new Stat(modJson.secondaryType_4, modJson.secondaryValue_4, +modJson.secondaryRoll_4 || 1));
+    if ("None" !== modJson.secondaryType_4 && "" !== modJson.secondaryValue_4) {
+      secondaryStats.push(
+        new Stat(
+          modJson.secondaryType_4,
+          modJson.secondaryValue_4,
+          +modJson.secondaryRoll_4 || 1
+        )
+      );
     }
 
-    const setBonus = setBonuses[modJson.set.toLowerCase().replace(' ', '')];
+    const setBonus = setBonuses[modJson.set.toLowerCase().replace(" ", "")];
 
     return new Mod(
       modJson.mod_uid,
@@ -276,7 +350,7 @@ class Mod {
       secondaryStats,
       modJson.characterID,
       modJson.tier
-    )
+    );
   }
 
   /**
@@ -288,32 +362,77 @@ class Mod {
    * @return Mod
    */
   static deserializeVersionOneTwo(modJson, characters) {
-    const primaryStat = new Stat(modJson.primaryBonusType, modJson.primaryBonusValue);
+    const primaryStat = new Stat(
+      modJson.primaryBonusType,
+      modJson.primaryBonusValue
+    );
     let secondaryStats = [];
 
-    if (!['None', ''].includes(modJson.secondaryType_1) && '' !== modJson.secondaryValue_1) {
-      secondaryStats.push(new Stat(modJson.secondaryType_1, modJson.secondaryValue_1, +modJson.secondaryRoll_1 || 1));
+    if (
+      !["None", ""].includes(modJson.secondaryType_1) &&
+      "" !== modJson.secondaryValue_1
+    ) {
+      secondaryStats.push(
+        new Stat(
+          modJson.secondaryType_1,
+          modJson.secondaryValue_1,
+          +modJson.secondaryRoll_1 || 1
+        )
+      );
     }
-    if (!['None', ''].includes(modJson.secondaryType_2) && '' !== modJson.secondaryValue_2) {
-      secondaryStats.push(new Stat(modJson.secondaryType_2, modJson.secondaryValue_2, +modJson.secondaryRoll_2 || 1));
+    if (
+      !["None", ""].includes(modJson.secondaryType_2) &&
+      "" !== modJson.secondaryValue_2
+    ) {
+      secondaryStats.push(
+        new Stat(
+          modJson.secondaryType_2,
+          modJson.secondaryValue_2,
+          +modJson.secondaryRoll_2 || 1
+        )
+      );
     }
-    if (!['None', ''].includes(modJson.secondaryType_3) && '' !== modJson.secondaryValue_3) {
-      secondaryStats.push(new Stat(modJson.secondaryType_3, modJson.secondaryValue_3, +modJson.secondaryRoll_3 || 1));
+    if (
+      !["None", ""].includes(modJson.secondaryType_3) &&
+      "" !== modJson.secondaryValue_3
+    ) {
+      secondaryStats.push(
+        new Stat(
+          modJson.secondaryType_3,
+          modJson.secondaryValue_3,
+          +modJson.secondaryRoll_3 || 1
+        )
+      );
     }
-    if (!['None', ''].includes(modJson.secondaryType_4) && '' !== modJson.secondaryValue_4) {
-      secondaryStats.push(new Stat(modJson.secondaryType_4, modJson.secondaryValue_4, +modJson.secondaryRoll_4 || 1));
+    if (
+      !["None", ""].includes(modJson.secondaryType_4) &&
+      "" !== modJson.secondaryValue_4
+    ) {
+      secondaryStats.push(
+        new Stat(
+          modJson.secondaryType_4,
+          modJson.secondaryValue_4,
+          +modJson.secondaryRoll_4 || 1
+        )
+      );
     }
 
-    const charactersByName = groupByKey(Object.values(characters), char => char.gameSettings.name);
+    const charactersByName = groupByKey(
+      Object.values(characters),
+      (char) => char.gameSettings.name
+    );
 
-    const characterName = ('' !== modJson.characterName && 'UNASSIGNED' !== modJson.characterName) ?
-      modJson.characterName.replace(/&amp;#39;/g, "'") : null;
+    const characterName =
+      "" !== modJson.characterName && "UNASSIGNED" !== modJson.characterName
+        ? modJson.characterName.replace(/&amp;#39;/g, "'")
+        : null;
 
-    const currentCharacter = (characterName && charactersByName[characterName]) ?
-      charactersByName[characterName].baseID :
-      null;
+    const currentCharacter =
+      characterName && charactersByName[characterName]
+        ? charactersByName[characterName].baseID
+        : null;
 
-    const setBonus = setBonuses[modJson.set.toLowerCase().replace(' ', '')];
+    const setBonus = setBonuses[modJson.set.toLowerCase().replace(" ", "")];
 
     return new Mod(
       modJson.mod_uid,

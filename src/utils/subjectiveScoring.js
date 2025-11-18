@@ -1,4 +1,4 @@
-import statRoll from '../constants/statRoll'
+import statRoll from "../constants/statRoll";
 
 /**
  * Return a score (suitable for sorting) of the offensive power of a mod.  This is a subjective score
@@ -12,38 +12,42 @@ import statRoll from '../constants/statRoll'
 export function offenseScore(mod) {
   // weights for the set (mod type), primary attribute and secondary attributes
   const setScore = {
-    'offense': 50,
-    'critdamage': 30,
-    'speed': 22.5,
-    'critchance': 20,
-    'potency': 20,
-    'defense': 0,
-    'health': 0,
-    'tenacity': 0
+    offense: 50,
+    critdamage: 30,
+    speed: 22.5,
+    critchance: 20,
+    potency: 20,
+    defense: 0,
+    health: 0,
+    tenacity: 0,
   };
 
   const statScore = {
-    'Speed': 6,
-    'Offense': 0.33,
-    'Offense %': 8,
-    'Critical Damage %': 4,
-    'Critical Chance %': 5,
-    'Critical Avoidance %': 0,
-    'Defense': 0,
-    'Defense %': 0,
-    'Health': 0,
-    'Health %': 0,
-    'Protection': 0,
-    'Protection %': 0,
-    'Potency %': 2.66,
-    'Tenacity %': 0,
-    'Accuracy %': 1
+    Speed: 6,
+    Offense: 0.33,
+    "Offense %": 8,
+    "Critical Damage %": 4,
+    "Critical Chance %": 5,
+    "Critical Avoidance %": 0,
+    Defense: 0,
+    "Defense %": 0,
+    Health: 0,
+    "Health %": 0,
+    Protection: 0,
+    "Protection %": 0,
+    "Potency %": 2.66,
+    "Tenacity %": 0,
+    "Accuracy %": 1,
   };
 
   // Return the value of the mod set plus the sum of the values of all the stats on the mod
-  return mod.secondaryStats.concat([mod.primaryStat])
-    .reduce((acc, stat) => acc + statScore[stat.type] * stat.value, setScore[mod.set.name]);
-};
+  return mod.secondaryStats
+    .concat([mod.primaryStat])
+    .reduce(
+      (acc, stat) => acc + statScore[stat.type] * stat.value,
+      setScore[mod.set.name]
+    );
+}
 
 /**
  * Return a score of a single secondary stat based on its degree of value, rolls, and matching set.
@@ -65,20 +69,23 @@ export function singleSecondaryStatScore(stat, mod) {
   const range = max - min;
   const avg = stat.value / stat.rolls;
 
-  let percentage = 0, score = 0;
+  let percentage = 0,
+    score = 0;
 
   if (avg >= min) {
-    percentage = (avg - min) / range * 100; // (s)
-    score = percentage * stat.rolls / statRoll['MAX_ROLLS']; // (S)
+    percentage = ((avg - min) / range) * 100; // (s)
+    score = (percentage * stat.rolls) / statRoll["MAX_ROLLS"]; // (S)
   } else {
     console.table(stat);
-    console.log(`Found a secondary stat with value lower than defined range, this should be reported to the developer. (Mod's rarity: ${mod.pips} level: ${mod.level})`);
+    console.log(
+      `Found a secondary stat with value lower than defined range, this should be reported to the developer. (Mod's rarity: ${mod.pips} level: ${mod.level})`
+    );
   }
 
   return {
     score: Math.round(score * 100) / 100 || 0,
-    percentage: Math.round(percentage * 100) / 100 || 0
-  }
+    percentage: Math.round(percentage * 100) / 100 || 0,
+  };
 }
 
 /**
@@ -92,9 +99,12 @@ export function singleSecondaryStatScore(stat, mod) {
  */
 export function modSecondaryStatScore(mod) {
   // Calculate score for each secondary stat
-  const statScores = mod.secondaryStats.length > 0 ? mod.secondaryStats.map(
-    (stat, index) => singleSecondaryStatScore(stat, mod)
-  ) : [];
+  const statScores =
+    mod.secondaryStats.length > 0
+      ? mod.secondaryStats.map((stat, index) =>
+          singleSecondaryStatScore(stat, mod)
+        )
+      : [];
 
   // Bonus Badges
   // Flat scores are based on the real-world average values @ 5 rolls (as of 2020)
@@ -107,116 +117,134 @@ export function modSecondaryStatScore(mod) {
   // both stats get the same bonus
   const bonuses = [
     {
-      badge: '⚡️',
-      title: 'Good Speed',
-      stats: ['Speed'],
+      badge: "⚡️",
+      title: "Good Speed",
+      stats: ["Speed"],
       minFlatScore: 53, // (5) 53% .53*20*5
       minPercentage: 60,
       minRolls: 3,
-      sets: ['speed'],
+      sets: ["speed"],
       primaries: {},
-      multiplier: 0.6
+      multiplier: 0.6,
     },
     {
-      badge: '⚔️',
-      title: 'Good Offense',
-      stats: ['Offense', 'Critical Chance'],
+      badge: "⚔️",
+      title: "Good Offense",
+      stats: ["Offense", "Critical Chance"],
       minFlatScore: 50, // (5) 50%
       minPercentage: 60,
       minRolls: 4,
-      sets: ['critchance', 'critdamage', 'offense'],
+      sets: ["critchance", "critdamage", "offense"],
       primaries: {
-        'triangle': ['Critical Chance', 'Critical Damage', 'Offense'],
-        'cross': ['Offense']
-      },
-      multiplier: 0.3
-    },
-    {
-      badge: '🛡️',
-      title: 'Good Defense',
-      stats: ['Health', 'Protection', 'Defense'],
-      minFlatScore: 53, // (5) 53%
-      minPercentage: 60,
-      minRolls: 4,
-      sets: ['health', 'defense'],
-      primaries: {
-        'triangle': ['Health', 'Protection'],
-        'cross': ['Health', 'Protection']
+        triangle: ["Critical Chance", "Critical Damage", "Offense"],
+        cross: ["Offense"],
       },
       multiplier: 0.3,
     },
     {
-      badge: '☠️',
-      title: 'Good Potency',
-      stats: ['Potency'],
+      badge: "🛡️",
+      title: "Good Defense",
+      stats: ["Health", "Protection", "Defense"],
+      minFlatScore: 53, // (5) 53%
+      minPercentage: 60,
+      minRolls: 4,
+      sets: ["health", "defense"],
+      primaries: {
+        triangle: ["Health", "Protection"],
+        cross: ["Health", "Protection"],
+      },
+      multiplier: 0.3,
+    },
+    {
+      badge: "☠️",
+      title: "Good Potency",
+      stats: ["Potency"],
       minFlatScore: 52, // (5) 52%
       minPercentage: 60,
       minRolls: 3,
-      sets: ['potency'],
+      sets: ["potency"],
       primaries: {
-        'cross': ['Potency']
+        cross: ["Potency"],
       },
-      multiplier: 0.2
+      multiplier: 0.2,
     },
     {
-      badge: '✊',
-      title: 'Good Tenacity',
-      stats: ['Tenacity'],
+      badge: "✊",
+      title: "Good Tenacity",
+      stats: ["Tenacity"],
       minFlatScore: 50, // (5) 50%
       minPercentage: 60,
       minRolls: 3,
-      sets: ['tenacity'],
+      sets: ["tenacity"],
       primaries: {
-        'cross': ['Tenacity']
+        cross: ["Tenacity"],
       },
-      multiplier: 0.2
-    }
+      multiplier: 0.2,
+    },
   ];
 
   // Give badges and bonuses if conditions are met
-  let bonusScore = 0, bonusIndex = [];
-  const badges = mod.secondaryStats.length > 0 ? bonuses.flatMap(
-    (bonus) => {
-      let bonusStatRolls = 0;
-      let bonusStatScore = 0;
-      let statIndex = [];
+  let bonusScore = 0,
+    bonusIndex = [];
+  const badges =
+    mod.secondaryStats.length > 0
+      ? bonuses.flatMap((bonus) => {
+          let bonusStatRolls = 0;
+          let bonusStatScore = 0;
+          let statIndex = [];
 
-      mod.secondaryStats.forEach((stat, index) => {
-        if (bonus.stats.includes(stat.displayType)) {
-          bonusStatRolls += stat.rolls;
-          bonusStatScore += statScores[index].score;
-          statIndex.push(index);
-        }
-      });
+          mod.secondaryStats.forEach((stat, index) => {
+            if (bonus.stats.includes(stat.displayType)) {
+              bonusStatRolls += stat.rolls;
+              bonusStatScore += statScores[index].score;
+              statIndex.push(index);
+            }
+          });
 
-      const averagePercentage = bonusStatScore * statRoll['MAX_ROLLS'] / bonusStatRolls;
+          const averagePercentage =
+            (bonusStatScore * statRoll["MAX_ROLLS"]) / bonusStatRolls;
 
-      if (bonusStatRolls >= bonus.minRolls && (averagePercentage >= bonus.minPercentage || bonusStatScore >= bonus.minFlatScore)) {
-        bonusScore += bonusStatScore * bonus.multiplier;
-        bonusIndex = bonusIndex.concat(statIndex);
+          if (
+            bonusStatRolls >= bonus.minRolls &&
+            (averagePercentage >= bonus.minPercentage ||
+              bonusStatScore >= bonus.minFlatScore)
+          ) {
+            bonusScore += bonusStatScore * bonus.multiplier;
+            bonusIndex = bonusIndex.concat(statIndex);
 
-        const ALIGN_BONUS = 10;
-        let alignBonusFlag = 0;
-        if (bonus.sets.includes(mod.set.name)) {
-          bonusScore += ALIGN_BONUS;
-          alignBonusFlag++
-        }
-        if (bonus.primaries.hasOwnProperty(mod.slot) && bonus.primaries[mod.slot].includes(mod.primaryStat.displayType)) {
-          bonusScore += ALIGN_BONUS;
-          alignBonusFlag++;
-        }
+            const ALIGN_BONUS = 10;
+            let alignBonusFlag = 0;
+            if (bonus.sets.includes(mod.set.name)) {
+              bonusScore += ALIGN_BONUS;
+              alignBonusFlag++;
+            }
+            if (
+              bonus.primaries.hasOwnProperty(mod.slot) &&
+              bonus.primaries[mod.slot].includes(mod.primaryStat.displayType)
+            ) {
+              bonusScore += ALIGN_BONUS;
+              alignBonusFlag++;
+            }
 
-        return { badge: bonus.badge, flag: alignBonusFlag, title: bonus.title };
-      }
-      else
-        return [];
-    }
-  ) : [];
+            return {
+              badge: bonus.badge,
+              flag: alignBonusFlag,
+              title: bonus.title,
+            };
+          } else return [];
+        })
+      : [];
 
   // the rest
-  const maxRolls = mod.pips === 6 ? mod.pips + mod.tier + 1 : mod.pips === 5 ? mod.pips + mod.tier - 2 : 8;
+  const maxRolls =
+    mod.pips === 6
+      ? mod.pips + mod.tier + 1
+      : mod.pips === 5
+      ? mod.pips + mod.tier - 2
+      : 8;
   const maxScore = maxRolls * 20;
-  const modScore = statScores.reduce((acc, cur) => acc + cur.score, 0) / maxScore * 100;
+  const modScore =
+    (statScores.reduce((acc, cur) => acc + cur.score, 0) / maxScore) * 100;
   const totalScore = modScore + bonusScore;
 
   return {
@@ -225,7 +253,6 @@ export function modSecondaryStatScore(mod) {
     statScores: statScores,
     bonusScore: Math.round(bonusScore * 100) / 100,
     bonusIndex: bonusIndex,
-    badges: badges
-  }
-
+    badges: badges,
+  };
 }

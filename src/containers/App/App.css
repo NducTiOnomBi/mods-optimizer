@@ -48,6 +48,18 @@
   padding: .25em !important;
 }
 
+.grid-2 {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  margin-bottom: 1em;
+}
+
+.grid-2 * {
+  max-width: 50%;
+}
+
 .inset {
   z-index: 100;
   position: relative;
@@ -177,7 +189,8 @@ html, body {
   display: inline-block;
 }
 
-.App-header .actions form {
+.App-header .actions form,
+.modal .actions form {
   display: inline-block;
 }
 
@@ -362,6 +375,10 @@ nav button.active {
   max-width: 40em;
 }
 
+.modal.c3po-modal {
+  max-width: 45em;
+}
+
 .modal .help {
   max-width: 30em;
 }
@@ -439,8 +456,26 @@ a {
   cursor: pointer;
 }
 
+code {
+  background-color: #222;
+}
+
+dl {
+  text-align: left;
+}
+
+dt {
+  font-weight: bold;
+  color: #2997f1;
+}
+
 img.fit {
   width: 100%;
+}
+
+img.textIcon {
+  width: 1.25em;
+  height: 1.25em;
 }
 
 .form-item {

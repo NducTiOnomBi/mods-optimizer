@@ -1,24 +1,24 @@
 // @flow
 
-import statTypeMap from "../constants/statTypeMap";
+import statTypeMap, { statIds } from "../constants/statTypeMap";
 import { modStats } from "../constants/enums";
 
 const hotUtilsTypeMap = {
-  'Accuracy %': 'Accuracy %',
-  'Crit Avoidance %': 'Critical Avoidance %',
-  'Crit Chance %': 'Critical Chance %',
-  'Crit Damage %': 'Critical Damage %',
-  'Defense': 'Defense',
-  'Defense %': 'Defense %',
-  'Health': 'Health',
-  'Health %': 'Health %',
-  'Offense': 'Offense',
-  'Offense %': 'Offense %',
-  'Potency %': 'Potency %',
-  'Protection': 'Protection',
-  'Protection %': 'Protection %',
-  'Resistance %': 'Tenacity %',
-  'Speed': 'Speed'
+  "Accuracy %": "Accuracy %",
+  "Crit Avoidance %": "Critical Avoidance %",
+  "Crit Chance %": "Critical Chance %",
+  "Crit Damage %": "Critical Damage %",
+  Defense: "Defense",
+  "Defense %": "Defense %",
+  Health: "Health",
+  "Health %": "Health %",
+  Offense: "Offense",
+  "Offense %": "Offense %",
+  "Potency %": "Potency %",
+  Protection: "Protection",
+  "Protection %": "Protection %",
+  "Resistance %": "Tenacity %",
+  Speed: "Speed",
 };
 
 class Stat {
@@ -31,12 +31,16 @@ class Stat {
   rolls;
 
   constructor(type, value, rolls = 1) {
-    this.displayModifier = type.endsWith('%') || value.endsWith('%') ? '%' : '';
+    this.displayModifier = type.endsWith("%") || value.endsWith("%") ? "%" : "";
     this.type = type;
-    this.displayType = type.endsWith('%') ? type.substr(0, type.length - 1).trim() : type;
-    this.rawValue = value.replace(/[+%]/g, '');
+    this.displayType = type.endsWith("%")
+      ? type.substr(0, type.length - 1).trim()
+      : type;
+    this.rawValue = value.replace(/[+%]/g, "");
     this.value = +this.rawValue;
-    this.isPercent = '%' === this.displayModifier && Stat.mixedTypes.includes(this.displayType);
+    this.isPercent =
+      "%" === this.displayModifier &&
+      Stat.mixedTypes.includes(this.displayType);
     this.rolls = rolls;
     this.updateDisplayValue();
   }
@@ -47,15 +51,15 @@ class Stat {
   getClass() {
     switch (this.rolls) {
       case 5:
-        return 'S';
+        return "S";
       case 4:
-        return 'A';
+        return "A";
       case 3:
-        return 'B';
+        return "B";
       case 2:
-        return 'C';
+        return "C";
       default:
-        return 'D';
+        return "D";
     }
   }
 
@@ -64,7 +68,9 @@ class Stat {
    * value was updated
    */
   updateDisplayValue() {
-    this.displayValue = `${this.value % 1 ? Math.round(this.value * 100) / 100 : this.value}`;
+    this.displayValue = `${
+      this.value % 1 ? Math.round(this.value * 100) / 100 : this.value
+    }`;
   }
 
   /**
@@ -90,10 +96,14 @@ class Stat {
    */
   minus(that) {
     if (!(that instanceof Stat)) {
-      throw new Error("Can't take the difference between a Stat and a non-Stat");
+      throw new Error(
+        "Can't take the difference between a Stat and a non-Stat"
+      );
     }
     if (that.type !== this.type) {
-      throw new Error("Can't take the difference between Stats of different types");
+      throw new Error(
+        "Can't take the difference between Stats of different types"
+      );
     }
     let valueDiff = this.value - that.value;
     if (valueDiff % 1) {
@@ -115,7 +125,10 @@ class Stat {
     if (!(that instanceof Stat)) {
       throw new Error("Can't add a non-Stat to a Stat");
     }
-    if (that.displayType !== this.displayType || that.isPercent !== this.isPercent) {
+    if (
+      that.displayType !== this.displayType ||
+      that.isPercent !== this.isPercent
+    ) {
       throw new Error("Can't add two Stats of different types");
     }
     const valueSum = this.value + that.value;
@@ -131,16 +144,23 @@ class Stat {
   getFlatValuesForCharacter(character) {
     const statPropertyNames = statTypeMap[this.displayType];
 
-    return statPropertyNames.map(statName => {
+    return statPropertyNames.map((statName) => {
       const displayName = Stat.displayNames[statName];
-      const statType = Stat.mixedTypes.includes(displayName) ? displayName : `${displayName} %`;
+      const statType = Stat.mixedTypes.includes(displayName)
+        ? displayName
+        : `${displayName} %`;
 
       if (this.isPercent && character.playerValues.baseStats) {
-        return new Stat(statType, `${this.value * character.playerValues.baseStats[statName] / 100}`);
+        return new Stat(
+          statType,
+          `${(this.value * character.playerValues.baseStats[statName]) / 100}`
+        );
       } else if (!this.isPercent) {
         return new Stat(statType, this.rawValue);
       } else {
-        throw new Error(`Stat is given as a percentage, but ${character.baseID} has no base stats`);
+        throw new Error(
+          `Stat is given as a percentage, but ${character.baseID} has no base stats`
+        );
       }
     });
   }
@@ -163,9 +183,12 @@ class Stat {
    */
   upgradeSecondary() {
     if (Stat.secondaryUpgradeFactors.hasOwnProperty(this.type)) {
-      return new Stat(this.type, `${Stat.secondaryUpgradeFactors[this.type] * this.value}`)
-    } else if ('Speed' === this.type) {
-      return new Stat(this.type, `${this.value + 1}`)
+      return new Stat(
+        this.type,
+        `${Stat.secondaryUpgradeFactors[this.type] * this.value}`
+      );
+    } else if ("Speed" === this.type) {
+      return new Stat(this.type, `${this.value + 1}`);
     } else {
       return this;
     }
@@ -181,25 +204,33 @@ class Stat {
     // Optimization Plans don't have separate physical and special critical chances, since both are always affected
     // equally. If this is a physical crit chance stat, then use 'critChance' as the stat type. If it's special crit
     // chance, ignore it altogether.
-    if (this.displayType === 'Special Critical Chance') {
+    if (this.displayType === "Special Critical Chance") {
       return 0;
     }
 
-    const statTypes = 'Physical Critical Chance' === this.displayType ? ['critChance'] : statTypeMap[this.displayType];
+    const statTypes =
+      "Physical Critical Chance" === this.displayType
+        ? ["critChance"]
+        : statTypeMap[this.displayType];
 
     if (!statTypes) {
       return 0;
     }
 
     if (this.isPercent) {
-      return statTypes.map(statType =>
-        target[statType] *
-        Math.floor(character.playerValues.baseStats[statType] * this.value / 100)
-      ).reduce((a, b) => a + b, 0);
+      return statTypes
+        .map(
+          (statType) =>
+            target[statType] *
+            Math.floor(
+              (character.playerValues.baseStats[statType] * this.value) / 100
+            )
+        )
+        .reduce((a, b) => a + b, 0);
     } else {
-      return statTypes.map(statType =>
-        target[statType] * this.value
-      ).reduce((a, b) => a + b, 0);
+      return statTypes
+        .map((statType) => target[statType] * this.value)
+        .reduce((a, b) => a + b, 0);
     }
   }
 
@@ -207,8 +238,11 @@ class Stat {
    * Extract the type and value of this stat for serialization
    */
   serialize() {
-    const percent = (this.isPercent || !Stat.mixedTypes.includes(this.displayType)) &&
-      !this.type.includes('%') ? '%' : '';
+    const percent =
+      (this.isPercent || !Stat.mixedTypes.includes(this.displayType)) &&
+      !this.type.includes("%")
+        ? "%"
+        : "";
 
     return [this.type, `+${this.rawValue}${percent}`, this.rolls];
   }
@@ -219,7 +253,11 @@ class Stat {
    * @returns {Stat}
    */
   static fromSwgohHelp(statJson) {
-    return new Stat(modStats[statJson.unitStat], `${statJson.value}`, statJson.roll);
+    return new Stat(
+      modStats[statJson.unitStat],
+      `${statJson.value}`,
+      statJson.roll
+    );
   }
 
   /**
@@ -228,148 +266,164 @@ class Stat {
    * @param value {string}
    * @param rolls {string}
    */
-  static fromHotUtils(type, value, rolls = '1') {
+  static fromHotUtils(type, value, rolls = "1") {
     return new Stat(hotUtilsTypeMap[type], `${value}`, +rolls);
+  }
+
+  /**
+   * Deserialize a stat from raw game data, as provided by C-3PO bot
+   */
+  static fromRaw(statJson) {
+    const statType = statIds[statJson.stat.unitStatId];
+
+    // `unscaledDecimalValue` is 100 million times the raw value. Percentages are expressed from 0-1
+    const statValue = statType.includes("%")
+      ? `${statJson.stat.unscaledDecimalValue / 1000000}`
+      : `${statJson.stat.unscaledDecimalValue / 100000000}`;
+
+    return new Stat(statType, statValue, statJson.statRolls);
   }
 }
 
 // A list of stat types that can be either a flat value or a percent
-Stat.mixedTypes = ['Health',
-  'Protection',
-  'Offense',
-  'Physical Damage',
-  'Special Damage',
-  'Speed',
-  'Defense',
-  'Armor',
-  'Resistance'];
+Stat.mixedTypes = [
+  "Health",
+  "Protection",
+  "Offense",
+  "Physical Damage",
+  "Special Damage",
+  "Speed",
+  "Defense",
+  "Armor",
+  "Resistance",
+];
 
 // A map from the internal name to a more human-friendly name for each stat type
 Stat.displayNames = {
-  'health': 'Health',
-  'protection': 'Protection',
-  'speed': 'Speed',
-  'critDmg': 'Critical Damage',
-  'potency': 'Potency',
-  'tenacity': 'Tenacity',
-  'physDmg': 'Physical Damage',
-  'specDmg': 'Special Damage',
-  'critChance': 'Critical Chance',
-  'physCritChance': 'Physical Critical Chance',
-  'specCritChance': 'Special Critical Chance',
-  'defense': 'Defense',
-  'armor': 'Armor',
-  'resistance': 'Resistance',
-  'accuracy': 'Accuracy',
-  'critAvoid': 'Critical Avoidance',
-  'physCritAvoid': 'Physical Critical Avoidance',
-  'specCritAvoid': 'Special Critical Avoidance'
+  health: "Health",
+  protection: "Protection",
+  speed: "Speed",
+  critDmg: "Critical Damage",
+  potency: "Potency",
+  tenacity: "Tenacity",
+  physDmg: "Physical Damage",
+  specDmg: "Special Damage",
+  critChance: "Critical Chance",
+  physCritChance: "Physical Critical Chance",
+  specCritChance: "Special Critical Chance",
+  defense: "Defense",
+  armor: "Armor",
+  resistance: "Resistance",
+  accuracy: "Accuracy",
+  critAvoid: "Critical Avoidance",
+  physCritAvoid: "Physical Critical Avoidance",
+  specCritAvoid: "Special Critical Avoidance",
 };
 
 // Map pips to maximum value at level 15 for each primary stat type
 Stat.maxPrimaries = {
-  'Offense': {
+  Offense: {
     1: "1.88%",
     2: "2%",
     3: "3.88%",
     4: "4%",
     5: "5.88%",
-    6: "8.50%"
+    6: "8.50%",
   },
-  'Defense': {
+  Defense: {
     1: "3.75%",
     2: "4%",
     3: "7.75%",
     4: "8%",
     5: "11.75%",
-    6: "20%"
+    6: "20%",
   },
-  'Health': {
+  Health: {
     1: "1.88%",
     2: "2%",
     3: "3.88%",
     4: "4%",
     5: "5.88%",
-    6: "16%"
+    6: "16%",
   },
-  'Protection': {
+  Protection: {
     1: "7.5%",
     2: "8%",
     3: "15.5%",
     4: "16%",
     5: "23.5%",
-    6: "24%"
+    6: "24%",
   },
-  'Speed': {
+  Speed: {
     1: "17",
     2: "19",
     3: "21",
     4: "26",
     5: "30",
-    6: "32"
+    6: "32",
   },
-  'Accuracy': {
+  Accuracy: {
     1: "7.5%",
     2: "8%",
     3: "8.75%",
     4: "10.5%",
     5: "12%",
-    6: "30%"
+    6: "30%",
   },
-  'Critical Avoidance': {
+  "Critical Avoidance": {
     1: "15%",
     2: "16%",
     3: "18%",
     4: "21%",
     5: "24%",
-    6: "35%"
+    6: "35%",
   },
-  'Critical Chance': {
+  "Critical Chance": {
     1: "7.50%",
     2: "8%",
     3: "8.75%",
     4: "10.5%",
     5: "12%",
-    6: "20%"
+    6: "20%",
   },
-  'Critical Damage': {
+  "Critical Damage": {
     1: "22.50%",
     2: "24%",
     3: "27%",
     4: "31.5%",
     5: "36%",
-    6: "42%"
+    6: "42%",
   },
-  'Potency': {
+  Potency: {
     1: "15%",
     2: "16%",
     3: "18%",
     4: "21%",
     5: "24%",
-    6: "30%"
+    6: "30%",
   },
-  'Tenacity': {
+  Tenacity: {
     1: "15%",
     2: "16%",
     3: "18%",
     4: "21%",
     5: "24%",
-    6: "35%"
-  }
+    6: "35%",
+  },
 };
 
 Stat.secondaryUpgradeFactors = {
-  'Offense %': 3.02,
-  'Defense %': 2.34,
-  'Health %': 1.86,
-  'Defense': 1.63,
-  'Tenacity %': 1.33,
-  'Potency %': 1.33,
-  'Protection %': 1.33,
-  'Health': 1.26,
-  'Protection': 1.11,
-  'Offense': 1.10,
-  'Critical Chance %': 1.04
+  "Offense %": 3.02,
+  "Defense %": 2.34,
+  "Health %": 1.86,
+  Defense: 1.63,
+  "Tenacity %": 1.33,
+  "Potency %": 1.33,
+  "Protection %": 1.33,
+  Health: 1.26,
+  Protection: 1.11,
+  Offense: 1.1,
+  "Critical Chance %": 1.04,
 };
 
 export default Stat;
